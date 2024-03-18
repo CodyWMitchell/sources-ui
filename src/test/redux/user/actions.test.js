@@ -1,4 +1,4 @@
-import { loadOrgAdmin, loadWritePermissions } from '../../../redux/user/actions';
+import { loadIntegrationsEndpointsPermissions, loadOrgAdmin, loadWritePermissions } from '../../../redux/user/actions';
 import { ACTION_TYPES } from '../../../redux/user/actionTypes';
 
 describe('user reducer actions', () => {
@@ -191,6 +191,98 @@ describe('user reducer actions', () => {
       });
       expect(dispatch.mock.calls[1][0]).toEqual({
         type: ACTION_TYPES.SET_ORG_ADMIN_REJECTED,
+        payload: { error: { detail: ERROR.data, title: expect.any(String) } },
+      });
+    });
+  });
+
+  describe('loadIntegrationsEndpointsPermissions', () => {
+    let getUserPermissions;
+
+    it('has read integrations endpoints permissions', async () => {
+      getUserPermissions = jest.fn().mockImplementation(() => Promise.resolve([{ permission: 'integrations:endpoints:read' }]));
+
+      await loadIntegrationsEndpointsPermissions(getUserPermissions)(dispatch);
+
+      expect(dispatch.mock.calls.length).toEqual(2);
+
+      expect(dispatch.mock.calls[0][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_PENDING,
+      });
+      expect(dispatch.mock.calls[1][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_FULFILLED,
+        payload: true,
+      });
+    });
+
+    it('has write integrations endpoints permissions', async () => {
+      getUserPermissions = jest.fn().mockImplementation(() => Promise.resolve([{ permission: 'integrations:endpoints:write' }]));
+
+      await loadIntegrationsEndpointsPermissions(getUserPermissions)(dispatch);
+
+      expect(dispatch.mock.calls.length).toEqual(2);
+
+      expect(dispatch.mock.calls[0][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_PENDING,
+      });
+      expect(dispatch.mock.calls[1][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_FULFILLED,
+        payload: true,
+      });
+    });
+
+    it('does not have integrations endpoints permissions', async () => {
+      getUserPermissions = jest.fn().mockImplementation(() => Promise.resolve([]));
+
+      await loadIntegrationsEndpointsPermissions(getUserPermissions)(dispatch);
+
+      expect(dispatch.mock.calls.length).toEqual(2);
+
+      expect(dispatch.mock.calls[0][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_PENDING,
+      });
+      expect(dispatch.mock.calls[1][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_FULFILLED,
+        payload: false,
+      });
+    });
+
+    it('rejected', async () => {
+      const ERROR = {
+        detail: 'detail',
+      };
+
+      getUserPermissions = jest.fn().mockImplementation(() => Promise.reject(ERROR));
+
+      await loadIntegrationsEndpointsPermissions(getUserPermissions)(dispatch);
+
+      expect(dispatch.mock.calls.length).toEqual(2);
+
+      expect(dispatch.mock.calls[0][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_PENDING,
+      });
+      expect(dispatch.mock.calls[1][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_REJECTED,
+        payload: { error: { detail: ERROR.detail, title: expect.any(String) } },
+      });
+    });
+
+    it('rejected with data', async () => {
+      const ERROR = {
+        data: 'detail',
+      };
+
+      getUserPermissions = jest.fn().mockImplementation(() => Promise.reject(ERROR));
+
+      await loadIntegrationsEndpointsPermissions(getUserPermissions)(dispatch);
+
+      expect(dispatch.mock.calls.length).toEqual(2);
+
+      expect(dispatch.mock.calls[0][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_PENDING,
+      });
+      expect(dispatch.mock.calls[1][0]).toEqual({
+        type: ACTION_TYPES.SET_INTEGRATIONS_ENDPOINTS_PERMISSIONS_REJECTED,
         payload: { error: { detail: ERROR.data, title: expect.any(String) } },
       });
     });
